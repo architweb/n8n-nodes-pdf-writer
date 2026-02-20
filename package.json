@@ -15,7 +15,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && npm run copy-icons",
-    "copy-icons": "node -e \"const fs=require('fs'),p=require('path');const src='nodes/PdfTextWriter',dst='dist/nodes/PdfTextWriter';fs.mkdirSync(dst,{recursive:true});fs.readdirSync(src).filter(f=>f.endsWith('.svg')).forEach(f=>fs.copyFileSync(p.join(src,f),p.join(dst,f)))\"",
+    "copy-icons": "node -e \"const fs=require('fs'),p=require('path');const src='nodes/PdfWriter',dst='dist/nodes/PdfWriter';fs.mkdirSync(dst,{recursive:true});fs.readdirSync(src).filter(f=>f.endsWith('.svg')).forEach(f=>fs.copyFileSync(p.join(src,f),p.join(dst,f)))\"",
     "dev": "tsc --watch"
   },
   "files": [
@@ -25,7 +25,7 @@
     "n8nNodesApiVersion": 1,
     "credentials": [],
     "nodes": [
-      "dist/nodes/PdfTextWriter/PdfTextWriter.node.js"
+      "dist/nodes/PdfWriter/PdfWriter.node.js"
     ]
   },
   "dependencies": {

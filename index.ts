@@ -1,1 +1,1 @@
-export { PdfTextWriter } from './nodes/PdfWriter/PdfTextWriter.node';
+export { PdfWriter } from './nodes/PdfWriter/PdfWriter.node';
