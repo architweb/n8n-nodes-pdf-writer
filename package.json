@@ -11,13 +11,13 @@
     "pdf-merge"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/architweb/n8n-node-pdf-write",
+  "homepage": "https://github.com/architweb/n8n-nodes-pdf-write",
   "author": {
     "name": "ArchitWeb"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/architweb/n8n-node-pdf-write.git"
+    "url": "git+https://github.com/architweb/n8n-nodes-pdf-write.git"
   },
   "main": "index.js",
   "scripts": {
