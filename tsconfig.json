@@ -5,11 +5,11 @@
     "lib": ["ES2019"],
     "outDir": "./dist",
     "rootDir": "./",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "declaration": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "resolveJsonModule": true
   },
   "include": ["nodes/**/*", "index.ts"],

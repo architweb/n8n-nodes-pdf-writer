@@ -342,6 +342,13 @@ export class PdfWriter implements INodeType {
           }
 
           const pdfBuffer = await this.helpers.getBinaryDataBuffer(i, mergeBinaryField);
+          if (binaryData[mergeBinaryField].mimeType && binaryData[mergeBinaryField].mimeType !== 'application/pdf') {
+            throw new NodeOperationError(
+              this.getNode(),
+              `Item ${i + 1} binary field "${mergeBinaryField}" is not a PDF (got "${binaryData[mergeBinaryField].mimeType}").`,
+              { itemIndex: i },
+            );
+          }
           const sourcePdf = await PDFDocument.load(pdfBuffer);
           const totalPages = sourcePdf.getPageCount();
 
@@ -417,6 +424,13 @@ export class PdfWriter implements INodeType {
 
         // Get the binary PDF data
         const binaryData = this.helpers.assertBinaryData(i, inputField);
+        if (binaryData.mimeType && binaryData.mimeType !== 'application/pdf') {
+          throw new NodeOperationError(
+            this.getNode(),
+            `Binary field "${inputField}" is not a PDF (got "${binaryData.mimeType}").`,
+            { itemIndex: i },
+          );
+        }
         const pdfBuffer = await this.helpers.getBinaryDataBuffer(i, inputField);
 
         // Load the PDF
@@ -460,11 +474,18 @@ export class PdfWriter implements INodeType {
           }
           const embeddedFont = fontCache.get(fontKey)!;
 
-          // Parse hex color
-          const hex = (entry.color ?? '#000000').replace('#', '');
-          const r = parseInt(hex.substring(0, 2), 16) / 255;
-          const g = parseInt(hex.substring(2, 4), 16) / 255;
-          const b = parseInt(hex.substring(4, 6), 16) / 255;
+          // Parse and validate hex color
+          const rawHex = (entry.color ?? '#000000').replace('#', '');
+          if (!/^[0-9a-fA-F]{6}$/.test(rawHex)) {
+            throw new NodeOperationError(
+              this.getNode(),
+              `Invalid color value: "${entry.color}". Expected a 6-digit hex color (e.g. "#FF0000").`,
+              { itemIndex: i },
+            );
+          }
+          const r = parseInt(rawHex.substring(0, 2), 16) / 255;
+          const g = parseInt(rawHex.substring(2, 4), 16) / 255;
+          const b = parseInt(rawHex.substring(4, 6), 16) / 255;
 
           for (const page of pagesToWrite) {
             const { height } = page.getSize();
