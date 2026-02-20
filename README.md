@@ -4,6 +4,9 @@ A custom n8n community node with two operations:
 - **Write Text** – write text at specific **X/Y coordinates** on any PDF page
 - **Merge PDFs** – merge specific pages from multiple PDF files into one
 
+This node was designed to fill a necessary gap,
+and we've decided to make it available for anyone who needs this functionality in n8n.
+
 ---
 
 ## Features
