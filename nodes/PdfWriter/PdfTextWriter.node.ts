@@ -8,17 +8,17 @@ import {
 
 import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 
-export class PdfTextWriter implements INodeType {
+export class PdfWriter implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'PDF Text Writer',
-    name: 'pdfTextWriter',
-    icon: 'file:pdf-text-writer.svg',
+    displayName: 'PDF Writer',
+    name: 'PdfWriter',
+    icon: 'file:pdf-writer.svg',
     group: ['transform'],
     version: 1,
     subtitle: '={{ $parameter["operation"] === "merge" ? "Merge PDFs" : "Write text on PDF" }}',
     description: 'Write text on PDF pages or merge specific pages from multiple PDFs',
     defaults: {
-      name: 'PDF Text Writer',
+      name: 'PDF Writer',
     },
     inputs: [{ type: 'main' as const }],
     outputs: [{ type: 'main' as const }],
@@ -348,7 +348,7 @@ export class PdfTextWriter implements INodeType {
           let pageIndices: number[];
           if (mergeMode === 'select') {
             const pagesStr = this.getNodeParameter('mergePages', i) as string;
-            pageIndices = PdfTextWriter.parsePageSelection(pagesStr, totalPages);
+            pageIndices = PdfWriter.parsePageSelection(pagesStr, totalPages);
           } else {
             pageIndices = sourcePdf.getPageIndices();
           }

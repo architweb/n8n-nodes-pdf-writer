@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-pdf-text-writer",
+  "name": "n8n-nodes-pdf-writer",
   "version": "1.0.0",
   "description": "n8n node to write text at X/Y coordinates on PDF pages and merge multiple PDFs with page selection",
   "keywords": ["n8n-community-node-package", "pdf", "text", "coordinates", "merge", "pdf-merge"],

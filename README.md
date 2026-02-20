@@ -1,4 +1,4 @@
-# n8n-nodes-pdf-text-writer
+# n8n-nodes-pdf-writer
 
 A custom n8n community node with two operations:
 - **Write Text** – write text at specific **X/Y coordinates** on any PDF page
@@ -23,7 +23,7 @@ A custom n8n community node with two operations:
 
 ## Installation
 
-In the n8n UI: **Settings → Community Nodes → Install** → enter `n8n-nodes-pdf-text-writer`
+In the n8n UI: **Settings → Community Nodes → Install** → enter `n8n-nodes-pdf-writer`
 
 Then restart n8n.
 
