@@ -1,0 +1,42 @@
+{
+  "name": "n8n-nodes-pdf-text-writer",
+  "version": "1.0.0",
+  "description": "n8n node to write text at X/Y coordinates on PDF pages and merge multiple PDFs with page selection",
+  "keywords": ["n8n-community-node-package", "pdf", "text", "coordinates", "merge", "pdf-merge"],
+  "license": "MIT",
+  "homepage": "https://github.com/architweb/n8n-node-pdf-write",
+  "author": {
+    "name": "ArchitWeb"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/architweb/n8n-node-pdf-write"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && npm run copy-icons",
+    "copy-icons": "node -e \"const fs=require('fs'),p=require('path');const src='nodes/PdfTextWriter',dst='dist/nodes/PdfTextWriter';fs.mkdirSync(dst,{recursive:true});fs.readdirSync(src).filter(f=>f.endsWith('.svg')).forEach(f=>fs.copyFileSync(p.join(src,f),p.join(dst,f)))\"",
+    "dev": "tsc --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [],
+    "nodes": [
+      "dist/nodes/PdfTextWriter/PdfTextWriter.node.js"
+    ]
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "n8n-workflow": "*",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
