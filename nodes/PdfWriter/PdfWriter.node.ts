@@ -15,8 +15,8 @@ export class PdfWriter implements INodeType {
     icon: 'file:pdf-writer.svg',
     group: ['transform'],
     version: 1,
-    subtitle: '={{ $parameter["operation"] === "merge" ? "Merge PDFs" : "Write text on PDF" }}',
-    description: 'Write text on PDF pages or merge specific pages from multiple PDFs',
+    subtitle: '={{ $parameter["operation"] === "merge" ? "Merge PDFs" : $parameter["operation"] === "addImage" ? "Add Images to PDF" : "Write text on PDF" }}',
+    description: 'Write text, add images, or merge PDF pages',
     defaults: {
       name: 'PDF Writer',
     },
@@ -37,13 +37,18 @@ export class PdfWriter implements INodeType {
             description: 'Write text at specific X/Y coordinates on a PDF',
           },
           {
+            name: 'Add Images',
+            value: 'addImage',
+            description: 'Add images to specific pages of a PDF',
+          },
+          {
             name: 'Merge PDFs',
             value: 'merge',
             description: 'Merge specific pages from multiple PDF files into one',
           },
         ],
       },
-      // ─── Write Text: Input ────────────────────────────────────────────────
+      // ─── Write Text / Add Image: Input ────────────────────────────────────────────────
       {
         displayName: 'Input PDF Field',
         name: 'inputField',
@@ -53,7 +58,7 @@ export class PdfWriter implements INodeType {
           'Name of the binary field that contains the input PDF (e.g. "data")',
         displayOptions: {
           show: {
-            operation: ['writeText'],
+            operation: ['writeText', 'addImage'],
           },
         },
       },
@@ -65,7 +70,7 @@ export class PdfWriter implements INodeType {
         description: 'Name of the binary field to write the modified PDF to',
         displayOptions: {
           show: {
-            operation: ['writeText'],
+            operation: ['writeText', 'addImage'],
           },
         },
       },
@@ -142,6 +147,110 @@ export class PdfWriter implements INodeType {
             operation: ['merge'],
           },
         },
+      },
+      // ─── Add Image: Image entries (fixed list) ────────────────────────────
+      {
+        displayName: 'Image Entries',
+        displayOptions: {
+          show: {
+            operation: ['addImage'],
+          },
+        },
+        name: 'imageEntries',
+        type: 'fixedCollection',
+        placeholder: 'Add Image Entry',
+        typeOptions: {
+          multipleValues: true,
+        },
+        default: {},
+        options: [
+          {
+            name: 'entry',
+            displayName: 'Image Entry',
+            values: [
+              {
+                displayName: 'Image Binary Field',
+                name: 'imageField',
+                type: 'string',
+                default: 'image',
+                description: 'Name of the binary field containing the image (PNG or JPG)',
+              },
+              {
+                displayName: 'Page',
+                name: 'page',
+                type: 'number',
+                default: 1,
+                description:
+                  'Page number to add image to (1-based index). Use 0 for all pages.',
+                typeOptions: {
+                  minValue: 0,
+                },
+              },
+              {
+                displayName: 'X Position',
+                name: 'x',
+                type: 'number',
+                default: 50,
+                description:
+                  'Horizontal position in points from the left edge of the page',
+              },
+              {
+                displayName: 'Y Position',
+                name: 'y',
+                type: 'number',
+                default: 50,
+                description:
+                  'Vertical position in points from the bottom edge of the page (PDF coordinate system). Use "Y from Top" option to switch.',
+              },
+              {
+                displayName: 'Y Origin',
+                name: 'yOrigin',
+                type: 'options',
+                default: 'bottom',
+                options: [
+                  {
+                    name: 'From Bottom (PDF default)',
+                    value: 'bottom',
+                  },
+                  {
+                    name: 'From Top',
+                    value: 'top',
+                  },
+                ],
+                description: 'Whether Y is measured from the bottom or the top of the page',
+              },
+              {
+                displayName: 'Width',
+                name: 'width',
+                type: 'number',
+                default: 0,
+                description: 'Width of the image in points. Leave as 0 to use image width.',
+              },
+              {
+                displayName: 'Height',
+                name: 'height',
+                type: 'number',
+                default: 0,
+                description: 'Height of the image in points. Leave as 0 to use image height.',
+              },
+              {
+                displayName: 'Opacity',
+                name: 'opacity',
+                type: 'number',
+                default: 1,
+                typeOptions: { minValue: 0, maxValue: 1, numberStepSize: 0.1 },
+                description: 'Image opacity from 0 (transparent) to 1 (opaque)',
+              },
+              {
+                displayName: 'Rotation (degrees)',
+                name: 'rotation',
+                type: 'number',
+                default: 0,
+                description: 'Image rotation in degrees (clockwise)',
+              },
+            ],
+          },
+        ],
       },
       // ─── Write Text: Text entries (fixed list) ────────────────────────────
       {
@@ -397,6 +506,144 @@ export class PdfWriter implements INodeType {
         }
       }
 
+      return [returnData];
+    }
+
+    // ─── Add Images ─────────────────────────────────────────────────────
+    if (operation === 'addImage') {
+      for (let i = 0; i < items.length; i++) {
+        try {
+          const inputField = this.getNodeParameter('inputField', i) as string;
+          const outputField = this.getNodeParameter('outputField', i) as string;
+          const imageEntriesParam = this.getNodeParameter('imageEntries', i) as {
+            entry?: Array<{
+              imageField: string;
+              page: number;
+              x: number;
+              y: number;
+              yOrigin: string;
+              width: number;
+              height: number;
+              opacity: number;
+              rotation: number;
+            }>;
+          };
+
+          const entries = imageEntriesParam.entry ?? [];
+
+          // Get the binary PDF data
+          const binaryData = this.helpers.assertBinaryData(i, inputField);
+          if (binaryData.mimeType && binaryData.mimeType !== 'application/pdf') {
+            throw new NodeOperationError(
+              this.getNode(),
+              `Binary field "${inputField}" is not a PDF (got "${binaryData.mimeType}").`,
+              { itemIndex: i },
+            );
+          }
+          const pdfBuffer = await this.helpers.getBinaryDataBuffer(i, inputField);
+
+          // Load the PDF
+          const pdfDoc = await PDFDocument.load(pdfBuffer);
+          const pages = pdfDoc.getPages();
+
+          // Process each image entry
+          for (const entry of entries) {
+            const targetPageNum = entry.page ?? 1;
+            const pagesToWrite = targetPageNum === 0
+              ? pages
+              : [pages[targetPageNum - 1]].filter(Boolean);
+
+            if (pagesToWrite.length === 0) {
+              throw new NodeOperationError(
+                this.getNode(),
+                `Page ${targetPageNum} does not exist. The PDF has ${pages.length} page(s).`,
+                { itemIndex: i },
+              );
+            }
+
+            // Get Image Binary
+            const imageBinaryField = entry.imageField;
+            const imageBinary = this.helpers.assertBinaryData(i, imageBinaryField);
+            const imageBuffer = await this.helpers.getBinaryDataBuffer(i, imageBinaryField);
+
+            let embeddedImage;
+            if (imageBinary.mimeType === 'image/png') {
+              embeddedImage = await pdfDoc.embedPng(imageBuffer);
+            } else if (imageBinary.mimeType === 'image/jpeg' || imageBinary.mimeType === 'image/jpg') {
+              embeddedImage = await pdfDoc.embedJpg(imageBuffer);
+            } else {
+              throw new NodeOperationError(
+                this.getNode(),
+                `Binary field "${imageBinaryField}" is not a supported image (PNG or JPG). Got "${imageBinary.mimeType}".`,
+                { itemIndex: i },
+              );
+            }
+
+            const { width, height } = embeddedImage.scale(1);
+            let targetWidth = entry.width;
+            let targetHeight = entry.height;
+
+            if (!targetWidth && !targetHeight) {
+              targetWidth = width;
+              targetHeight = height;
+            } else if (targetWidth && !targetHeight) {
+              targetHeight = (targetWidth / width) * height;
+            } else if (!targetWidth && targetHeight) {
+              targetWidth = (targetHeight / height) * width;
+            }
+
+            for (const page of pagesToWrite) {
+              const { height: pageHeight } = page.getSize();
+              let yCoord = entry.y ?? 50;
+              if (entry.yOrigin === 'top') {
+                yCoord = pageHeight - yCoord - targetHeight;
+              }
+
+              page.drawImage(embeddedImage, {
+                x: entry.x ?? 50,
+                y: yCoord,
+                width: targetWidth,
+                height: targetHeight,
+                opacity: entry.opacity ?? 1,
+                rotate: degrees(entry.rotation ?? 0),
+              });
+            }
+          }
+
+          // Save the modified PDF
+          const modifiedPdfBytes = await pdfDoc.save();
+          const modifiedBuffer = Buffer.from(modifiedPdfBytes);
+
+          const newBinaryData = await this.helpers.prepareBinaryData(
+            modifiedBuffer,
+            binaryData.fileName ?? 'output.pdf',
+            'application/pdf',
+          );
+
+          returnData.push({
+            json: {
+              ...items[i].json,
+              pdfModified: true,
+              pageCount: pages.length,
+              imageEntriesAdded: entries.length,
+            },
+            binary: {
+              [outputField]: newBinaryData,
+            },
+            pairedItem: { item: i },
+          });
+
+        } catch (error) {
+          if (this.continueOnFail()) {
+            returnData.push({
+              json: { error: (error as Error).message },
+              pairedItem: { item: i },
+            });
+            continue;
+          }
+          throw error;
+        }
+      }
       return [returnData];
     }
 
