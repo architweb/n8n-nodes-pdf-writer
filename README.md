@@ -1,7 +1,8 @@
 # n8n-nodes-pdf-writer
 
-A custom n8n community node with two operations:
+A custom n8n community node with three operations:
 - **Write Text** – write text at specific **X/Y coordinates** on any PDF page
+- **Add Images** – add images (PNG/JPG) at specific coordinates on any PDF page
 - **Merge PDFs** – merge specific pages from multiple PDF files into one
 
 This node was designed to fill a necessary gap,
@@ -12,6 +13,7 @@ and we've decided to make it available for anyone who needs this functionality i
 ## Features
 
 - ✅ Write text at precise X/Y coordinates on any page
+- ✅ Add images (PNG/JPG) at precise X/Y coordinates
 - ✅ Label each text entry for easy identification
 - ✅ Multiple text entries per execution
 - ✅ Target a specific page or **all pages** at once
@@ -57,6 +59,30 @@ Writes one or more text entries at specified X/Y positions on a PDF.
 | **Font** | Helvetica, Helvetica Bold, Times Roman, Courier, etc. |
 | **Color (Hex)** | Text color, e.g. `#FF0000` for red |
 | **Rotation** | Degrees counter-clockwise |
+| **Opacity** | 0.0 (invisible) → 1.0 (solid) |
+
+---
+
+### Add Images
+
+Adds one or more images (PNG or JPG) at specified X/Y positions on a PDF.
+
+| Parameter | Description |
+|---|---|
+| **Input PDF Field** | Binary field name holding the source PDF (default: `data`) |
+| **Output Field Name** | Binary field name to write the result to (default: `data`) |
+
+#### Image Entry fields
+
+| Field | Description |
+|---|---|
+| **Image Binary Field** | Binary field name holding the image (PNG or JPG) |
+| **Page** | Page number (1-based). Set to `0` to apply to all pages |
+| **X Position** | Points from the left edge |
+| **Y Position** | Points from the selected Y origin |
+| **Y Origin** | `From Bottom` (PDF default) or `From Top` |
+| **Width / Height** | Dimensions in points. If one is set, the other scales proportionally. If both 0, uses original size. |
+| **Rotation** | Degrees clockwise |
 | **Opacity** | 0.0 (invisible) → 1.0 (solid) |
 
 ---
