@@ -1,16 +1,29 @@
 {
   "name": "n8n-nodes-pdf-writer",
+<<<<<<< HEAD
   "version": "1.1.0",
   "description": "n8n node to write text or images at X/Y coordinates on PDF pages and merge multiple PDFs with page selection",
   "keywords": ["n8n-community-node-package", "pdf", "text", "coordinates", "merge", "pdf-merge"],
+=======
+  "version": "1.0.0",
+  "description": "n8n node to write text at X/Y coordinates on PDF pages and merge multiple PDFs with page selection",
+  "keywords": [
+    "n8n-community-node-package",
+    "pdf",
+    "text",
+    "coordinates",
+    "merge",
+    "pdf-merge"
+  ],
+>>>>>>> 72bfdedaab29088d0430bad42869ef6d5df01d51
   "license": "MIT",
-  "homepage": "https://github.com/architweb/n8n-node-pdf-write",
+  "homepage": "https://github.com/architweb/n8n-nodes-pdf-write",
   "author": {
     "name": "ArchitWeb"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/architweb/n8n-node-pdf-write"
+    "url": "git+https://github.com/architweb/n8n-nodes-pdf-write.git"
   },
   "main": "index.js",
   "scripts": {
